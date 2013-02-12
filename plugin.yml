@@ -1,13 +1,13 @@
 name: AdminTime
 main: com.andoutay.admintime.AdminTime
-version: 0.3.7
+version: 0.4.2
 description: >
              AdminTime allows admins to switch in and out of an Admining state and allows them to resume where they left off when done admining
 
 commands:
   admintime:
-    description: Enter Admining mode
-    usage: /<command> [player|reload|version]. A player name must be specified when entering admin mode!
+    description: AdminTime commands
+    usage: /<command> [player|list|reload|version|help]. A player name must be specified when entering admin mode!
     aliases: [at, adminmode]
 
 permissions:
@@ -19,15 +19,23 @@ permissions:
       admintime.toggle: true
       admintime.reload: true
       admintime.version: true
+      admintime.eject: true
+      admintime.list: true
   admintime.notify:
     description: Players with this permission are notified when other players enter and exit Admin mode
     default: false
   admintime.toggle:
-    description: Allows players to toggle Admin mode on and off
+    description: Allows players to toggle Admin Mode on and off
     default: false
   admintime.reload:
     description: Allows players to reload the configuration and permissions files
     default: false
   admintime.version:
     description: Allows players to check the version
+    default: false
+  admintime.eject:
+    description: Allows players to remove others from Admin Mode
+    default: false
+  admintime.list:
+    description: Allows players to see who is in Admin Mode
     default: false

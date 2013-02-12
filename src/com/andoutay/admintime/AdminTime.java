@@ -51,6 +51,12 @@ public class AdminTime extends JavaPlugin
 			return reloadConfig(s);
 		else if (isVersion(cmd.getName(), args))
 			return showVersion(s);
+		else if (isEject(cmd.getName(), args))
+			return eject(s, args);
+		else if (isList(cmd.getName(), args))
+			return showList(s, args);
+		else if (isHelp(cmd.getName(), args))
+			return showHelp(s);
 		else if (isToggle(cmd.getName(), args))
 			return toggle(s, args);
 		
@@ -70,6 +76,21 @@ public class AdminTime extends JavaPlugin
 	private boolean isVersion(String cmdName, String[] args)
 	{
 		return cmdName.equalsIgnoreCase("admintime") && args.length == 1 && args[0].equalsIgnoreCase("version");
+	}
+	
+	private boolean isEject(String cmdName, String[] args)
+	{
+		return cmdName.equalsIgnoreCase("admintime") && args.length == 2 && args[0].equalsIgnoreCase("eject");
+	}
+	
+	private boolean isList(String cmdName, String[] args)
+	{
+		return cmdName.equalsIgnoreCase("admintime") && (args.length == 1 || args.length == 2) && args[0].equalsIgnoreCase("list");
+	}
+	
+	private boolean isHelp(String cmdName, String[] args)
+	{
+		return cmdName.equalsIgnoreCase("admintime") && args.length == 1 && args[0].equalsIgnoreCase("help");
 	}
 	
 	private boolean toggle(CommandSender s, String[] args)
@@ -132,6 +153,75 @@ public class AdminTime extends JavaPlugin
 		return true;
 	}
 	
+	private boolean eject(CommandSender s, String[] args)
+	{
+		if (!(s instanceof ConsoleCommandSender || (s instanceof Player && ((Player)s).hasPermission("admintime.eject"))))
+			return noAccess(s);
+		
+		Player p = getPlayerForName(args[1]);
+		if (p == null) return playerNotFound(s);
+		
+		if (inAdminMode.containsKey(p) && lastLocs.containsKey(p) && inAdminMode.get(p))
+		{
+			inAdminMode.put(p, false);
+			lastLocs.remove(p);
+			tellAll(p.getDisplayName(), "left", "");
+		}
+		else
+			s.sendMessage("That player is not in admin mode");
+		
+		return true;
+	}
+	
+	private boolean showList(CommandSender s, String[] args)
+	{
+		if (!(s instanceof ConsoleCommandSender || (s instanceof Player && ((Player)s).hasPermission("admintime.list"))))
+			return noAccess(s);
+		
+		int page = 0;
+		final int perPage = 9;
+		final int totPages = inAdminMode.size() / perPage;
+		Object players[] = inAdminMode.keySet().toArray();
+		Object values[] = inAdminMode.values().toArray();
+		try {
+			page = (args.length == 2) ? Integer.parseInt(args[1]) : 1;
+		} catch(NumberFormatException e) {
+			return invalidArgument(s);
+		}
+		
+		if (page > totPages) page = totPages;
+		if (page < 1) page = 1; 
+		
+		s.sendMessage(chPref + "Players in Admin Mode:");
+		log.info("page: " + page);
+		
+		int end = (totPages < page * perPage) ? totPages : page * perPage;
+		for (int i = (page - 1) * perPage; i < end; i++)
+		{
+			log.info("key: " + players[i] + " value: " + values[i]);
+			if ((Boolean)values[i])
+				s.sendMessage(((Player)players[i]).getDisplayName());
+			else
+				i--;
+		}
+		
+		return true;
+	}
+	
+	private boolean showHelp(CommandSender s)
+	{
+		s.sendMessage(chPref + "Help:");
+		s.sendMessage("Aliases: at, adminmode");
+		s.sendMessage("/admintime [player]: Toggle admin mode. The name of the player being helped is required for entering admin mode");
+		s.sendMessage("/admintime reload: Reload the AdminTime permissions file");
+		s.sendMessage("/admintime version: Get the current version of AdminTime");
+		s.sendMessage("/admintime list [#]: List players in admin mode. Specify page numbers if necessary");
+		s.sendMessage("/admintime eject: Kick a player out of admin mode");
+		s.sendMessage("/admintime help: Show this help message");
+		
+		return true;
+	}
+	
 	private boolean noAccess(CommandSender s)
 	{
 		s.sendMessage(ChatColor.RED + "You do not have access to that command");
@@ -144,7 +234,19 @@ public class AdminTime extends JavaPlugin
 		return true;
 	}
 	
-	public String getPlayerName(String partial)
+	private boolean playerNotFound(CommandSender s)
+	{
+		s.sendMessage(ChatColor.RED + "Player not found");
+		return true;
+	}
+	
+	private boolean invalidArgument(CommandSender s)
+	{
+		s.sendMessage(ChatColor.RED + "Invalid argument");
+		return false;
+	}
+	
+	public Player getPlayerForName(String partial)
 	{
 		Player player = null;
 		boolean found = false, foundMult = false;
@@ -165,12 +267,16 @@ public class AdminTime extends JavaPlugin
 				}
 		
 		if (foundMult)
-			return "";
-		
-		if (player == null)
-			return getServer().getOfflinePlayer(partial).getName();
-		
-		return player.getDisplayName();
+			return null;
+			
+		return player;
+	}
+	
+	public String getPlayerName(String partial)
+	{
+		Player temp = getPlayerForName(partial);
+		if (temp == null) return getServer().getOfflinePlayer(partial).getName();
+		return temp.getDisplayName();
 	}
 	
 	public void tellAll(String name, String msg, String recipient)
