@@ -13,21 +13,29 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class AdminTime extends JavaPlugin
 {
+	/*TODO: Tie in with Essentials /back command when teleporting a player back to their location when they're done admining
+	 * 
+	 */
+	
 	public static Logger log = Logger.getLogger("Minecraft");
 	public static String logPref = "[AdminTime] ";
 	public static String chPref = ChatColor.LIGHT_PURPLE + logPref + ChatColor.RESET;
 	public static HashMap<Player, Boolean> inAdminMode;
 	public static HashMap<Player, Location> lastLocs;
+	public static ATPermissionsFileHandler permHandler;
 	
 	public void onLoad()
 	{
-		
+		permHandler = new ATPermissionsFileHandler(this);
 	}
 	
 	public void onEnable()
 	{
 		inAdminMode = new HashMap<Player, Boolean>();
 		lastLocs = new HashMap<Player, Location>();
+		
+		permHandler.onEnable();
+		getServer().getPluginManager().registerEvents(permHandler, this);
 		
 		log.info(logPref + "Enabled");
 	}
@@ -39,33 +47,32 @@ public class AdminTime extends JavaPlugin
 	
 	public boolean onCommand(CommandSender s, Command cmd, String label, String[] args)
 	{
-		if (isToggle(cmd.getName(), args))
-			return toggle(s);
-		else if (isReload(cmd.getName(), args))
+		if (isReload(cmd.getName(), args))
 			return reloadConfig(s);
 		else if (isVersion(cmd.getName(), args))
 			return showVersion(s);
+		else if (isToggle(cmd.getName(), args))
+			return toggle(s, args);
 		
 		return false;
 	}
 	
-	
 	private boolean isToggle(String cmdName, String[] args)
 	{
-		return cmdName.equalsIgnoreCase("admintime") && args.length == 1;
+		return cmdName.equalsIgnoreCase("admintime") && (args.length == 0 || args.length == 1);
 	}
 	
 	private boolean isReload(String cmdName, String[] args)
 	{
-		return cmdName.equalsIgnoreCase("admintime") && args.length == 2 && args[1].equalsIgnoreCase("reload");
+		return cmdName.equalsIgnoreCase("admintime") && args.length == 1 && args[0].equalsIgnoreCase("reload");
 	}
 	
 	private boolean isVersion(String cmdName, String[] args)
 	{
-		return cmdName.equalsIgnoreCase("admintime") && args.length == 2 && args[1].equalsIgnoreCase("version");
+		return cmdName.equalsIgnoreCase("admintime") && args.length == 1 && args[0].equalsIgnoreCase("version");
 	}
 	
-	private boolean toggle(CommandSender s)
+	private boolean toggle(CommandSender s, String[] args)
 	{
 		if (s instanceof ConsoleCommandSender)
 			return noConsoleAccess(s);
@@ -77,14 +84,30 @@ public class AdminTime extends JavaPlugin
 			inAdminMode.put(p, false);
 		
 		inAdminMode.put(p, !inAdminMode.get(p));
-		lastLocs.put(p, p.getLocation());
-		
 		
 		if (inAdminMode.get(p))
-			//add permissions
-			p.sendMessage("Adding perms");
+		{
+			if (args.length == 0 || (getServer().getPlayer(args[0]) == null && !getServer().getOfflinePlayer(args[0]).hasPlayedBefore()))
+			{
+				inAdminMode.put(p, false);
+				return false;
+			}
+
+			lastLocs.put(p, p.getLocation());
+			permHandler.enterAdminMode(p, p.getWorld().getName());
+			String str = getPlayerName(args[0]);
+			if (str == "") str = args[0];
+			tellAll(p.getDisplayName(), "entered", str);
+			p.sendMessage(chPref + ChatColor.RED + "You are now in Admin Mode!");
+		}
 		else
-			p.sendMessage("Removing perms...");
+		{
+			permHandler.exitAdminMode(p, p.getWorld().getName());
+			p.teleport(lastLocs.get(p));
+			lastLocs.remove(p);
+			tellAll(p.getDisplayName(), "left", "");
+			p.sendMessage(chPref + ChatColor.RED + "You have left Admin Mode!");
+		}
 		
 		return true;
 	}
@@ -94,9 +117,8 @@ public class AdminTime extends JavaPlugin
 		if (!(s instanceof ConsoleCommandSender || (s instanceof Player && ((Player)s).hasPermission("admintime.reload"))))
 			return noAccess(s);
 		
-		//ATConfig.reload();
-		//ATPerms.reload();
-		s.sendMessage(chPref + "Config reloaded");
+		permHandler.reload();
+		s.sendMessage(chPref + "Permissions reloaded");
 		
 		return true;
 	}
@@ -120,5 +142,42 @@ public class AdminTime extends JavaPlugin
 	{
 		s.sendMessage(ChatColor.RED + "You must be in-game to use that command");
 		return true;
+	}
+	
+	public String getPlayerName(String partial)
+	{
+		Player player = null;
+		boolean found = false, foundMult = false;
+		
+		player = getServer().getPlayer(partial);
+		
+		if (player == null)
+			for (Player p: getServer().getOnlinePlayers())
+				if (p.getDisplayName().toLowerCase().contains(partial.toLowerCase()))
+				{
+					if (found)
+					{
+						foundMult = true;
+						break;
+					}
+					player = p;
+					found = true;
+				}
+		
+		if (foundMult)
+			return "";
+		
+		if (player == null)
+			return getServer().getOfflinePlayer(partial).getName();
+		
+		return player.getDisplayName();
+	}
+	
+	public void tellAll(String name, String msg, String recipient)
+	{
+		for (Player p : getServer().getOnlinePlayers())
+			if (p.hasPermission("admintime.notify"))
+				p.sendMessage(ChatColor.WHITE + name + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : " to help " + recipient + "!"));
+		log.info(logPref + name + " " + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : " to help " + recipient + "!"));
 	}
 }
