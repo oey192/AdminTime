@@ -108,10 +108,15 @@ public class AdminTime extends JavaPlugin
 		
 		if (inAdminMode.get(p))
 		{
-			if (args.length == 0 || (getServer().getPlayer(args[0]) == null && !getServer().getOfflinePlayer(args[0]).hasPlayedBefore()))
+			if (args.length == 0) 
 			{
 				inAdminMode.put(p, false);
-				return false;
+				return missingArgument(s);
+			}
+			else if (getPlayerForName(args[0]) == null && !getServer().getOfflinePlayer(args[0]).hasPlayedBefore())
+			{
+				inAdminMode.put(p, false);
+				return playerNotFound(s);
 			}
 
 			lastLocs.put(p, p.getLocation());
@@ -180,11 +185,11 @@ public class AdminTime extends JavaPlugin
 		
 		int page = 0;
 		final int perPage = 9;
-		final int totPages = inAdminMode.size() / perPage;
+		final int totPages = inAdminMode.size() / perPage + 1;
 		Object players[] = inAdminMode.keySet().toArray();
 		Object values[] = inAdminMode.values().toArray();
 		try {
-			page = (args.length == 2) ? Integer.parseInt(args[1]) : 1;
+			page = ((args.length == 2) ? Integer.parseInt(args[1]) : 1);
 		} catch(NumberFormatException e) {
 			return invalidArgument(s);
 		}
@@ -193,17 +198,23 @@ public class AdminTime extends JavaPlugin
 		if (page < 1) page = 1; 
 		
 		s.sendMessage(chPref + "Players in Admin Mode:");
-		log.info("page: " + page);
 		
+		int start = (page - 1) * perPage;
 		int end = (totPages < page * perPage) ? totPages : page * perPage;
-		for (int i = (page - 1) * perPage; i < end; i++)
+		boolean found = false;
+		if (inAdminMode.size() == 0) end = 0;
+		for (int i = start; i < end; i++)
 		{
-			log.info("key: " + players[i] + " value: " + values[i]);
 			if ((Boolean)values[i])
+			{
+				found = true;
 				s.sendMessage(((Player)players[i]).getDisplayName());
-			else
+			}
+			else if (i >= end)
 				i--;
 		}
+		
+		if (!found) s.sendMessage("No players are currently in Admin Mode");
 		
 		return true;
 	}
@@ -246,6 +257,12 @@ public class AdminTime extends JavaPlugin
 		return false;
 	}
 	
+	private boolean missingArgument(CommandSender s)
+	{
+		s.sendMessage(ChatColor.RED + "You must supply another argument to use that command");
+		return false;
+	}
+	
 	public Player getPlayerForName(String partial)
 	{
 		Player player = null;
@@ -277,13 +294,19 @@ public class AdminTime extends JavaPlugin
 		Player temp = getPlayerForName(partial);
 		if (temp == null) return getServer().getOfflinePlayer(partial).getName();
 		return temp.getDisplayName();
+		
+		/*TODO
+		 * add mChat support - Parser.parsePlayerName(sender.getName(), world);
+		 * import com.miraclem4n.mchat.api.Parser
+		 * remember to include ClassNotFoundException handling
+		 */
 	}
 	
 	public void tellAll(String name, String msg, String recipient)
 	{
 		for (Player p : getServer().getOnlinePlayers())
 			if (p.hasPermission("admintime.notify"))
-				p.sendMessage(ChatColor.WHITE + name + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : " to help " + recipient + "!"));
-		log.info(logPref + name + " " + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : " to help " + recipient + "!"));
+				p.sendMessage(ChatColor.WHITE + name + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : " to help " + (recipient.equalsIgnoreCase(name) ? "themself" : recipient) + "!"));
+		log.info(logPref + name + " " + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : " to help " + (recipient.equalsIgnoreCase(name) ? "themself" : recipient) + "!"));
 	}
 }
