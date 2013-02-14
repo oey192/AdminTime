@@ -1,10 +1,8 @@
 name: AdminTime
 main: com.andoutay.admintime.AdminTime
-version: 0.5.2
+version: 0.6.2
 description: >
              AdminTime allows admins to switch in and out of an Admining state and allows them to resume where they left off when done admining
-
-softdepend: [mChat]
 
 commands:
   admintime:

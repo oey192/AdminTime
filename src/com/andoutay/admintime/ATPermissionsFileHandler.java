@@ -88,10 +88,9 @@ public class ATPermissionsFileHandler implements Listener
 	private void setPerms(List<String> permsToMod, Player p, boolean tf)
 	{
 		for (String perm : permsToMod)
-		{
-			p.addAttachment(plugin, perm, tf);
-			p.recalculatePermissions();				
-		}
+				p.addAttachment(plugin, perm, tf);
+		
+		p.recalculatePermissions();				
 	}
 	
 	public void reload()
@@ -110,11 +109,13 @@ public class ATPermissionsFileHandler implements Listener
 	{
 		Player p = evt.getPlayer();
 		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p))
+		{
 			plugin.tellAll(p.getDisplayName(), "left", "");
-		
-		exitAdminMode(p, p.getWorld().getName());
-		AdminTime.inAdminMode.remove(p);
-		AdminTime.lastLocs.remove(p);
+			exitAdminMode(p, p.getWorld().getName());
+			p.teleport(AdminTime.lastLocs.get(p));
+			AdminTime.inAdminMode.remove(p);
+			AdminTime.lastLocs.remove(p);
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.LOW)

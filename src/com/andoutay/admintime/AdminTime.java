@@ -15,6 +15,11 @@ public class AdminTime extends JavaPlugin
 {
 	/*TODO: Tie in with Essentials /back command when teleporting a player back to their location when they're done admining
 	 * 
+	 * 
+	 * public static PermissionManager getPexManager(AdminTime plugin) throws ClassNotFoundException, NoClassDefFoundError
+	{
+		return plugin.getServer().getServicesManager().load(PermissionManager.class);
+	}
 	 */
 	
 	public static Logger log = Logger.getLogger("Minecraft");
@@ -173,7 +178,7 @@ public class AdminTime extends JavaPlugin
 			tellAll(p.getDisplayName(), "left", "");
 		}
 		else
-			s.sendMessage("That player is not in admin mode");
+			s.sendMessage(chPref + "That player is not in admin mode");
 		
 		return true;
 	}
@@ -182,6 +187,12 @@ public class AdminTime extends JavaPlugin
 	{
 		if (!(s instanceof ConsoleCommandSender || (s instanceof Player && ((Player)s).hasPermission("admintime.list"))))
 			return noAccess(s);
+		
+		if (inAdminMode.size() == 0)
+		{
+			s.sendMessage(chPref + "No players are currently in Admin Mode");
+			return true;
+		}
 		
 		int page = 0;
 		final int perPage = 9;
@@ -197,24 +208,22 @@ public class AdminTime extends JavaPlugin
 		if (page > totPages) page = totPages;
 		if (page < 1) page = 1; 
 		
-		s.sendMessage(chPref + "Players in Admin Mode:");
-		
+		s.sendMessage(chPref + "Players in Admin Mode (" + page + "/" + totPages + ")");
 		int start = (page - 1) * perPage;
-		int end = (totPages < page * perPage) ? totPages : page * perPage;
-		boolean found = false;
-		if (inAdminMode.size() == 0) end = 0;
-		for (int i = start; i < end; i++)
+		int end = (totPages > page * perPage) ? totPages : page * perPage;
+		for (int i = start; i < end && i < inAdminMode.size(); i++)
 		{
+			/*try {
+				if (values[i] == null || players[i] == null) break;
+			} catch (NullPointerException e) {
+				break;
+			}*/
+			
 			if ((Boolean)values[i])
-			{
-				found = true;
 				s.sendMessage(((Player)players[i]).getDisplayName());
-			}
 			else if (i >= end)
 				i--;
 		}
-		
-		if (!found) s.sendMessage("No players are currently in Admin Mode");
 		
 		return true;
 	}
@@ -297,8 +306,7 @@ public class AdminTime extends JavaPlugin
 		
 		/*TODO
 		 * add mChat support - Parser.parsePlayerName(sender.getName(), world);
-		 * import com.miraclem4n.mchat.api.Parser
-		 * remember to include ClassNotFoundException handling
+		 * get Parser using ExternalJarHandler outlined at top of file
 		 */
 	}
 	
