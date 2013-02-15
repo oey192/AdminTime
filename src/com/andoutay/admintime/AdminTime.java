@@ -16,10 +16,6 @@ public class AdminTime extends JavaPlugin
 	/*TODO: Tie in with Essentials /back command when teleporting a player back to their location when they're done admining
 	 * 
 	 * 
-	 * public static PermissionManager getPexManager(AdminTime plugin) throws ClassNotFoundException, NoClassDefFoundError
-	{
-		return plugin.getServer().getServicesManager().load(PermissionManager.class);
-	}
 	 */
 	
 	public static Logger log = Logger.getLogger("Minecraft");
@@ -31,6 +27,7 @@ public class AdminTime extends JavaPlugin
 	
 	public void onLoad()
 	{
+		new ATConfig(this);
 		permHandler = new ATPermissionsFileHandler(this);
 	}
 	
@@ -39,8 +36,10 @@ public class AdminTime extends JavaPlugin
 		inAdminMode = new HashMap<Player, Boolean>();
 		lastLocs = new HashMap<Player, Location>();
 		
+		ATConfig.onEnable();
 		permHandler.onEnable();
 		getServer().getPluginManager().registerEvents(permHandler, this);
+		
 		
 		log.info(logPref + "Enabled");
 	}
@@ -148,6 +147,8 @@ public class AdminTime extends JavaPlugin
 		if (!(s instanceof ConsoleCommandSender || (s instanceof Player && ((Player)s).hasPermission("admintime.reload"))))
 			return noAccess(s);
 		
+		ATConfig.reload();
+		s.sendMessage(chPref + "Config reloaded");
 		permHandler.reload();
 		s.sendMessage(chPref + "Permissions reloaded");
 		
@@ -174,6 +175,7 @@ public class AdminTime extends JavaPlugin
 		if (inAdminMode.containsKey(p) && lastLocs.containsKey(p) && inAdminMode.get(p))
 		{
 			inAdminMode.put(p, false);
+			permHandler.exitAdminMode(p, p.getWorld().getName());
 			lastLocs.remove(p);
 			tellAll(p.getDisplayName(), "left", "");
 		}
@@ -211,19 +213,19 @@ public class AdminTime extends JavaPlugin
 		s.sendMessage(chPref + "Players in Admin Mode (" + page + "/" + totPages + ")");
 		int start = (page - 1) * perPage;
 		int end = (totPages > page * perPage) ? totPages : page * perPage;
+		boolean found = false;
 		for (int i = start; i < end && i < inAdminMode.size(); i++)
-		{
-			/*try {
-				if (values[i] == null || players[i] == null) break;
-			} catch (NullPointerException e) {
-				break;
-			}*/
-			
+		{	
 			if ((Boolean)values[i])
+			{
+				found = true;
 				s.sendMessage(((Player)players[i]).getDisplayName());
+			}
 			else if (i >= end)
 				i--;
 		}
+		
+		if (!found) s.sendMessage("No players are currently in Admin Mode");
 		
 		return true;
 	}
@@ -232,7 +234,7 @@ public class AdminTime extends JavaPlugin
 	{
 		s.sendMessage(chPref + "Help:");
 		s.sendMessage("Aliases: at, adminmode");
-		s.sendMessage("/admintime [player]: Toggle admin mode. The name of the player being helped is required for entering admin mode");
+		s.sendMessage("/admintime [player]: Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified");
 		s.sendMessage("/admintime reload: Reload the AdminTime permissions file");
 		s.sendMessage("/admintime version: Get the current version of AdminTime");
 		s.sendMessage("/admintime list [#]: List players in admin mode. Specify page numbers if necessary");

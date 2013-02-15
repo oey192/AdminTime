@@ -15,6 +15,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.PluginDisableEvent;
+
+import ru.tehkode.permissions.PermissionManager;
+
+import com.earth2me.essentials.Essentials;
 
 public class ATPermissionsFileHandler implements Listener
 {
@@ -24,6 +29,7 @@ public class ATPermissionsFileHandler implements Listener
 	private Logger log = Logger.getLogger("Minecraft");
 	private final String adMode = "adminMode";
 	private final String regMode = "regMode";
+	private boolean disabled;
 	
 	ATPermissionsFileHandler(AdminTime plugin)
 	{
@@ -34,6 +40,7 @@ public class ATPermissionsFileHandler implements Listener
 	
 	public void onEnable()
 	{
+		disabled = false;
 		List<World> worlds = plugin.getServer().getWorlds();
 		
 		for (World w : worlds)
@@ -62,33 +69,65 @@ public class ATPermissionsFileHandler implements Listener
 	public void enterAdminMode(Player p, String worldName)
 	{
 		swapPermSets(adMode, regMode, p, worldName);
+		setGod(p, true);
 	}
 	
 	public void exitAdminMode(Player p, String worldName)
 	{
 		swapPermSets(regMode, adMode, p, worldName);
+		setGod(p, false);
 	}
 	
 	private void swapPermSets(String set1, String set2, Player p, String worldName)
 	{
 		if (!(worldName == null || worldName.equalsIgnoreCase("")))
 		{
-			List<String> newPerms = perms.getStringList(set1 + "." + worldName);
-			List<String> oldPerms = perms.getStringList(set2 + "." + worldName);
-			setPerms(oldPerms, p, false);
-			setPerms(newPerms, p, true);
+			setPermSet(set2, p, worldName, false);
+			setPermSet(set1, p, worldName, true);
 		}
 		
-		List<String> allNewPerms = perms.getStringList(set1 + ".allWorlds");
-		List<String> allOldPerms = perms.getStringList(set2 + ".allWorlds");
-		setPerms(allOldPerms, p, false);
-		setPerms(allNewPerms, p, true);
+		setPermSet(set2, p, "allWorlds", false);
+		setPermSet(set1, p, "allWorlds", true);
+	}
+	
+	private void setPermSet(String set, Player p, String worldName, boolean tf)
+	{
+		List<String> ps = perms.getStringList(set + "." + worldName);
+		setPerms(ps, p, tf);
 	}
 	
 	private void setPerms(List<String> permsToMod, Player p, boolean tf)
 	{
+		PermissionManager pm = null;
+		try {
+			pm = ATClassManager.getPexManager(plugin);
+		} catch (ClassNotFoundException e) {
+			pm = null;
+		} catch (NoClassDefFoundError e) {
+			pm = null;
+		}
 		for (String perm : permsToMod)
+		{
+			if (pm != null && ATConfig.usePexForWE && perm.contains("worldedit."))
+			{
+				if (tf)
+				{
+					log.info("adding + " + perm);
+					pm.getUser(p).addPermission(perm);
+				}
+				else
+				{
+					log.info("removing " + perm);
+					pm.getUser(p).removePermission(perm);
+				}
+				
+			}
+			else
+			{
+				log.info("setting " + perm + " to " + tf);
 				p.addAttachment(plugin, perm, tf);
+			}
+		}
 		
 		p.recalculatePermissions();				
 	}
@@ -96,6 +135,13 @@ public class ATPermissionsFileHandler implements Listener
 	public void reload()
 	{
 		perms = YamlConfiguration.loadConfiguration(permFile);
+		for (Player p : AdminTime.inAdminMode.keySet())
+		{
+			if (AdminTime.inAdminMode.get(p))
+				enterAdminMode(p, p.getWorld().getName());
+			else
+				exitAdminMode(p, p.getWorld().getName());
+		}
 	}
 	
 	@EventHandler
@@ -124,8 +170,35 @@ public class ATPermissionsFileHandler implements Listener
 		Player p = evt.getPlayer();
 		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p))
 		{
-			exitAdminMode(p, evt.getFrom().getName());
-			enterAdminMode(p, p.getWorld().getName());
+			setPermSet(adMode, p, evt.getFrom().getName(), false);
+			setPermSet(adMode, p, p.getWorld().getName(), true);
+		}
+		else
+		{
+			setPermSet(regMode, p, evt.getFrom().getName(), false);
+			setPermSet(regMode, p, p.getWorld().getName(), true);
+		}
+	}
+	
+	@EventHandler
+	private void onDisable(PluginDisableEvent evt)
+	{
+		if (!disabled)
+		{
+			for (Player p: AdminTime.inAdminMode.keySet())
+				exitAdminMode(p, p.getWorld().getName());
+			disabled = true;
+		}
+	}
+
+	private void setGod(Player p, boolean tf)
+	{
+		if (ATConfig.useGod)
+		{
+			Essentials ess = null;
+			ess = ATClassManager.getEssentials(plugin);
+			if (ess == null) return;
+			ess.getUser(p).setGodModeEnabled(tf);
 		}
 	}
 }
