@@ -6,7 +6,7 @@ public class ATConfig
 {
 	private static Configuration config;
 	
-	public static boolean useGod, usePexForWE;
+	public static boolean useGod, usePex;
 	private static AdminTime plugin;
 	
 	ATConfig(AdminTime plugin)
@@ -32,6 +32,6 @@ public class ATConfig
 	public static void loadConfigVals()
 	{
 		useGod = config.getBoolean("useGod");
-		usePexForWE = config.getBoolean("usePexForWE");
+		usePex = config.getBoolean("usePex");
 	}
 }

@@ -108,25 +108,15 @@ public class ATPermissionsFileHandler implements Listener
 		}
 		for (String perm : permsToMod)
 		{
-			if (pm != null && ATConfig.usePexForWE && perm.contains("worldedit."))
+			if (pm != null && ATConfig.usePex)
 			{
 				if (tf)
-				{
-					log.info("adding + " + perm);
 					pm.getUser(p).addPermission(perm);
-				}
 				else
-				{
-					log.info("removing " + perm);
 					pm.getUser(p).removePermission(perm);
-				}
-				
 			}
 			else
-			{
-				log.info("setting " + perm + " to " + tf);
 				p.addAttachment(plugin, perm, tf);
-			}
 		}
 		
 		p.recalculatePermissions();				
