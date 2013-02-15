@@ -15,6 +15,15 @@ public class AdminTime extends JavaPlugin
 {
 	/*TODO: Tie in with Essentials /back command when teleporting a player back to their location when they're done admining
 	 * 
+	 * Keep track of who the player's helping and display this in /at list
+	 * 
+	 * Add mChat support (see below)
+	 * 
+	 * Add Metrics support
+	 * 
+	 * Add Auto-update support
+	 * 
+	 * put on BukkitDev
 	 * 
 	 */
 	
