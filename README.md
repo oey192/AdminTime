@@ -7,7 +7,7 @@ Note: This plugin does not override permissions set by other permission plugins.
 
 <h2>Commands</h2>
 
-Aliases: at, adminmode
+Aliases: at, am, adminmode
 
 /admintime [player]:<br/>Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified
 

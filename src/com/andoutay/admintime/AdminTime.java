@@ -242,7 +242,7 @@ public class AdminTime extends JavaPlugin
 	private boolean showHelp(CommandSender s)
 	{
 		s.sendMessage(chPref + "Help:");
-		s.sendMessage("Aliases: at, adminmode");
+		s.sendMessage("Aliases: at, am, adminmode");
 		s.sendMessage("/admintime [player]: Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified");
 		s.sendMessage("/admintime reload: Reload the AdminTime permissions file");
 		s.sendMessage("/admintime version: Get the current version of AdminTime");
