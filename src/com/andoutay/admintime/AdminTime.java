@@ -110,7 +110,7 @@ public class AdminTime extends JavaPlugin
 	{
 		if (s instanceof ConsoleCommandSender)
 			return noConsoleAccess(s);
-		else if (!s.hasPermission("admintime.toggle"))
+		else if (!(s.hasPermission("admintime.toggle.self") || s.hasPermission("admintime.toggle.others")))
 			return noAccess(s);
 		
 		Player p = (Player)s;
@@ -132,10 +132,15 @@ public class AdminTime extends JavaPlugin
 				return playerNotFound(s);
 			}
 
+			String str = getPlayerName(args[0]);
+			if (!((p.hasPermission("admintime.toggle.self") && p.getName().equalsIgnoreCase(str)) || (p.hasPermission("admintime.toggle.others") && !p.getName().equalsIgnoreCase(str))))
+			{
+				inAdminMode.put(p, false);
+				return badPlayer(p);
+			}
+			if (str == "") str = args[0];
 			lastLocs.put(p, p.getLocation());
 			permHandler.enterAdminMode(p, p.getWorld().getName());
-			String str = getPlayerName(args[0]);
-			if (str == "") str = args[0];
 			tellAll(p.getDisplayName(), "entered", str);
 			p.sendMessage(chPref + ChatColor.RED + "You are now in Admin Mode!");
 		}
@@ -206,15 +211,24 @@ public class AdminTime extends JavaPlugin
 		}
 		
 		int page = 0;
-		final int perPage = 9;
-		final int totPages = inAdminMode.size() / perPage + 1;
-		Object players[] = inAdminMode.keySet().toArray();
-		Object values[] = inAdminMode.values().toArray();
+		
 		try {
 			page = ((args.length == 2) ? Integer.parseInt(args[1]) : 1);
 		} catch(NumberFormatException e) {
 			return invalidArgument(s);
 		}
+		
+		showListToSender(s, page);
+		
+		return true;
+	}
+	
+	public void showListToSender(CommandSender s, int page)
+	{
+		final int perPage = 9;
+		final int totPages = inAdminMode.size() / perPage + 1;
+		Object players[] = inAdminMode.keySet().toArray();
+		Object values[] = inAdminMode.values().toArray();
 		
 		if (page > totPages) page = totPages;
 		if (page < 1) page = 1; 
@@ -235,8 +249,6 @@ public class AdminTime extends JavaPlugin
 		}
 		
 		if (!found) s.sendMessage("No players are currently in Admin Mode");
-		
-		return true;
 	}
 	
 	private boolean showHelp(CommandSender s)
@@ -281,6 +293,12 @@ public class AdminTime extends JavaPlugin
 	{
 		s.sendMessage(ChatColor.RED + "You must supply another argument to use that command");
 		return false;
+	}
+	
+	private boolean badPlayer(CommandSender s)
+	{
+		s.sendMessage(ChatColor.RED + "You may not help that player");
+		return true;
 	}
 	
 	public Player getPlayerForName(String partial)

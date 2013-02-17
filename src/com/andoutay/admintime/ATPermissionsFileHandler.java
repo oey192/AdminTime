@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -69,13 +70,13 @@ public class ATPermissionsFileHandler implements Listener
 	public void enterAdminMode(Player p, String worldName)
 	{
 		swapPermSets(adMode, regMode, p, worldName);
-		setGod(p, true);
+		setGodAndFly(p, true);
 	}
 	
 	public void exitAdminMode(Player p, String worldName)
 	{
 		swapPermSets(regMode, adMode, p, worldName);
-		setGod(p, false);
+		setGodAndFly(p, false);
 	}
 	
 	private void swapPermSets(String set1, String set2, Player p, String worldName)
@@ -138,6 +139,8 @@ public class ATPermissionsFileHandler implements Listener
 	public void onPlayerJoin(PlayerJoinEvent evt)
 	{
 		exitAdminMode(evt.getPlayer(), evt.getPlayer().getWorld().getName());
+		if (evt.getPlayer().hasPermission("admintime.loginlist"))
+			plugin.showListToSender((CommandSender)evt.getPlayer(), 1);
 	}
 	
 	@EventHandler
@@ -181,14 +184,20 @@ public class ATPermissionsFileHandler implements Listener
 		}
 	}
 
-	private void setGod(Player p, boolean tf)
+	private void setGodAndFly(Player p, boolean tf)
 	{
-		if (ATConfig.useGod)
+		if (ATConfig.useGod || ATConfig.useFly)
 		{
 			Essentials ess = null;
 			ess = ATClassManager.getEssentials(plugin);
 			if (ess == null) return;
-			ess.getUser(p).setGodModeEnabled(tf);
+			if (ATConfig.useGod) ess.getUser(p).setGodModeEnabled(tf);
+			if (ATConfig.useFly)
+			{
+				ess.getUser(p).setAllowFlight(tf);
+				if (!ess.getUser(p).getAllowFlight())
+					ess.getUser(p).setFlying(false);
+			}
 		}
 	}
 }
