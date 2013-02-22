@@ -5,11 +5,13 @@ import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.kitteh.vanish.staticaccess.VanishNoPacket;
 
 public class AdminTime extends JavaPlugin
 {
@@ -33,9 +35,10 @@ public class AdminTime extends JavaPlugin
 	public static HashMap<Player, Boolean> inAdminMode;
 	public static HashMap<Player, Location> lastLocs;
 	public static ATPermissionsFileHandler permHandler;
-	
+	public static Server server;
 	public void onLoad()
 	{
+		server = getServer();
 		new ATConfig(this);
 		permHandler = new ATPermissionsFileHandler(this);
 	}
@@ -141,7 +144,7 @@ public class AdminTime extends JavaPlugin
 			if (str == "") str = args[0];
 			lastLocs.put(p, p.getLocation());
 			permHandler.enterAdminMode(p, p.getWorld().getName());
-			tellAll(p.getDisplayName(), "entered", str);
+			tellAll(p, "entered", str);
 			p.sendMessage(chPref + ChatColor.RED + "You are now in Admin Mode!");
 		}
 		else
@@ -149,7 +152,7 @@ public class AdminTime extends JavaPlugin
 			permHandler.exitAdminMode(p, p.getWorld().getName());
 			p.teleport(lastLocs.get(p));
 			lastLocs.remove(p);
-			tellAll(p.getDisplayName(), "left", "");
+			tellAll(p, "left", "");
 			p.sendMessage(chPref + ChatColor.RED + "You have left Admin Mode!");
 		}
 		
@@ -191,7 +194,7 @@ public class AdminTime extends JavaPlugin
 			inAdminMode.put(p, false);
 			permHandler.exitAdminMode(p, p.getWorld().getName());
 			lastLocs.remove(p);
-			tellAll(p.getDisplayName(), "left", "");
+			tellAll(p, "left", "");
 		}
 		else
 			s.sendMessage(chPref + "That player is not in admin mode");
@@ -339,11 +342,33 @@ public class AdminTime extends JavaPlugin
 		 */
 	}
 	
-	public void tellAll(String name, String msg, String recipient)
-	{
-		for (Player p : getServer().getOnlinePlayers())
-			if (p.hasPermission("admintime.notify"))
-				p.sendMessage(ChatColor.WHITE + name + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : " to help " + (recipient.equalsIgnoreCase(name) ? "themself" : recipient) + "!"));
-		log.info(logPref + name + " " + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : " to help " + (recipient.equalsIgnoreCase(name) ? "themself" : recipient) + "!"));
-	}
+	  private static boolean isVanished(String name)
+	  {
+	    try
+	    {
+	      if (server.getPluginManager().getPlugin("VanishNoPacket") != null)
+	        return VanishNoPacket.isVanished(name); 
+	    } catch (Exception localException) {
+	    }
+	    return false;
+	  }
+
+	  private boolean canSee(Player looking, Player uncertain) {
+	    try {
+	      if (server.getPluginManager().getPlugin("VanishNoPacket") != null)
+	        return VanishNoPacket.canSee(looking, uncertain); 
+	    } catch (Exception localException) {
+	    }
+	    return true;
+	  }
+
+	  public void tellAll(Player player, String msg, String recipient)
+	  {
+	    for (Player p : getServer().getOnlinePlayers()) {
+	      if ((!p.hasPermission("admintime.notify")) || (
+	        (isVanished(p.getName())) && (!canSee(p, player)))) continue;
+	      p.sendMessage(ChatColor.WHITE + player.getDisplayName() + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).append("!").toString()));
+	    }
+	    log.info(logPref + player.getName() + " " + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).append("!").toString()));
+	  }
 }
