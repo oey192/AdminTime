@@ -149,7 +149,7 @@ public class ATPermissionsFileHandler implements Listener
 		Player p = evt.getPlayer();
 		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p))
 		{
-			plugin.tellAll(p, "left", "");
+			plugin.tellAll(p, "left", "", "");
 			exitAdminMode(p, p.getWorld().getName());
 			p.teleport(AdminTime.lastLocs.get(p));
 			AdminTime.inAdminMode.remove(p);

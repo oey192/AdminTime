@@ -154,7 +154,7 @@ public class AdminTime extends JavaPlugin
 			helping.put(p, str);
 			reasons.put(p, rsn);
 			permHandler.enterAdminMode(p, p.getWorld().getName());
-			tellAll(p, "entered", str);
+			tellAll(p, "entered", str, rsn);
 			p.sendMessage(chPref + ChatColor.RED + "You are now in Admin Mode!");
 		}
 		else
@@ -162,7 +162,7 @@ public class AdminTime extends JavaPlugin
 			permHandler.exitAdminMode(p, p.getWorld().getName());
 			p.teleport(lastLocs.get(p));
 			lastLocs.remove(p);
-			tellAll(p, "left", "");
+			tellAll(p, "left", "", "");
 			p.sendMessage(chPref + ChatColor.RED + "You have left Admin Mode!");
 		}
 
@@ -204,7 +204,7 @@ public class AdminTime extends JavaPlugin
 			inAdminMode.put(p, false);
 			permHandler.exitAdminMode(p, p.getWorld().getName());
 			lastLocs.remove(p);
-			tellAll(p, "left", "");
+			tellAll(p, "left", "", "");
 		} else
 			s.sendMessage(chPref + "That player is not in admin mode");
 
@@ -385,12 +385,12 @@ public class AdminTime extends JavaPlugin
 		return true;
 	}
 
-	public void tellAll(Player player, String msg, String recipient)
+	public void tellAll(Player player, String msg, String recipient, String reason)
 	{
 		for (Player p : getServer().getOnlinePlayers())
 		{
 	    	if (p.hasPermission("admintime.notify") && (!isVanished(p.getName()) || canSee(p, player)))
-	    			p.sendMessage(ChatColor.WHITE + player.getDisplayName() + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).append("!").toString()));
+	    			p.sendMessage(ChatColor.WHITE + player.getDisplayName() + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).toString()) + (reason.equalsIgnoreCase("") ? "" : " with " + reason) + "!");
 	    }
 	    log.info(logPref + player.getName() + " " + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).append("!").toString()));
 	}
