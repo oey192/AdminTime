@@ -13,7 +13,7 @@ Note: If PermissionsEx is being used on your server, this plugin temporarily ove
 
 Aliases: at, am, adminmode
 
-/admintime [player] [reason]:<br/>Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified. A reason may be specified if desired.
+/admintime [player] [reason]:<br/>Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified. A reason may be specified if desired.<br/>When leaving admin mode, the player is teleported to the locatation they were at when they entered admin mode
 
 /admintime reload:<br/>Reload the AdminTime permissions file
 
