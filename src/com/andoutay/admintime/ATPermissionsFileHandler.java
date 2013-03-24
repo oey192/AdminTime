@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -194,6 +195,7 @@ public class ATPermissionsFileHandler implements Listener
 			if (ATConfig.useGod) ess.getUser(p).setGodModeEnabled(tf);
 			if (ATConfig.useFly)
 			{
+				if (p.getGameMode() == GameMode.CREATIVE) tf = true;
 				ess.getUser(p).setAllowFlight(tf);
 				if (!ess.getUser(p).getAllowFlight())
 					ess.getUser(p).setFlying(false);

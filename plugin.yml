@@ -1,6 +1,6 @@
 name: AdminTime
 main: com.andoutay.admintime.AdminTime
-version: 1.1.7
+version: 1.2.0
 description: >
              AdminTime allows admins to switch in and out of an Admining state and allows them to resume where they left off when done admining
 softdepend: [VanishNoPacket, Essentials]

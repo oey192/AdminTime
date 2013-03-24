@@ -128,6 +128,10 @@ public class AdminTime extends JavaPlugin
 
 		if (inAdminMode.get(p))
 		{
+			//1 line for debug
+			if (args.length >= 1 && ATConfig.dispDebug) log.info(logPref + "Checking for player based on: " + args[0]);
+			
+			
 			if (args.length == 0)
 			{
 				inAdminMode.put(p, false);
@@ -136,8 +140,14 @@ public class AdminTime extends JavaPlugin
 			else if (getPlayerForName(args[0]) == null && !getServer().getOfflinePlayer(args[0]).hasPlayedBefore())
 			{
 				inAdminMode.put(p, false);
+				//1 line for debug
+				if (ATConfig.dispDebug) log.warning(logPref + "Did not find a player for " + args[0]);
 				return playerNotFound(s);
 			}
+			
+			//1 line for debug
+			if (ATConfig.dispDebug) log.info(logPref + "Found a player for " + args[0]);
+			
 			
 			if (args.length > 1)
 				rsn = implode(Arrays.copyOfRange(args, 1, args.length));
@@ -159,9 +169,9 @@ public class AdminTime extends JavaPlugin
 		}
 		else
 		{
-			permHandler.exitAdminMode(p, p.getWorld().getName());
 			p.teleport(lastLocs.get(p));
 			lastLocs.remove(p);
+			permHandler.exitAdminMode(p, p.getWorld().getName());
 			tellAll(p, "left", "", "");
 			p.sendMessage(chPref + ChatColor.RED + "You have left Admin Mode!");
 		}
@@ -200,12 +210,14 @@ public class AdminTime extends JavaPlugin
 		if (p == null)
 			return playerNotFound(s);
 
-		if (inAdminMode.containsKey(p) && lastLocs.containsKey(p) && inAdminMode.get(p)) {
+		if (inAdminMode.containsKey(p) && lastLocs.containsKey(p) && inAdminMode.get(p))
+		{
 			inAdminMode.put(p, false);
 			permHandler.exitAdminMode(p, p.getWorld().getName());
 			lastLocs.remove(p);
 			tellAll(p, "left", "", "");
-		} else
+		}
+		else
 			s.sendMessage(chPref + "That player is not in admin mode");
 
 		return true;
@@ -392,7 +404,7 @@ public class AdminTime extends JavaPlugin
 	    	if (p.hasPermission("admintime.notify") && (!isVanished(p.getName()) || canSee(p, player)))
 	    			p.sendMessage(ChatColor.WHITE + player.getDisplayName() + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).toString()) + (reason.equalsIgnoreCase("") ? "" : " with " + reason) + "!");
 	    }
-	    log.info(logPref + player.getName() + " " + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).append("!").toString()));
+	    log.info(logPref + player.getName() + " " + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).toString()) + (reason.equalsIgnoreCase("") ? "" : " with " + reason) + "!");
 	}
 	
 	public String implode(String[] str)
