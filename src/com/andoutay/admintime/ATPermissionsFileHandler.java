@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -157,7 +158,7 @@ public class ATPermissionsFileHandler implements Listener
 			AdminTime.lastLocs.remove(p);
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOW)
 	public void onPlayerChangeWorld(PlayerChangedWorldEvent evt)
 	{
@@ -172,6 +173,13 @@ public class ATPermissionsFileHandler implements Listener
 			setPermSet(regMode, p, evt.getFrom().getName(), false);
 			setPermSet(regMode, p, p.getWorld().getName(), true);
 		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onPlayerChangeGameMode(PlayerGameModeChangeEvent evt)
+	{
+		final Player p = evt.getPlayer();
+		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable () { public void run() { setGodAndFly(p, true); }}, 0);
 	}
 	
 	@EventHandler
@@ -189,17 +197,18 @@ public class ATPermissionsFileHandler implements Listener
 	{
 		if (ATConfig.useGod || ATConfig.useFly)
 		{
+			if (ATConfig.useFly)
+			{
+				if (p.getGameMode() == GameMode.CREATIVE)
+					p.setAllowFlight(true);
+				else
+					p.setAllowFlight(tf);
+				if (!p.getAllowFlight()) p.setFlying(false);
+			}
 			Essentials ess = null;
 			ess = ATClassManager.getEssentials(plugin);
 			if (ess == null) return;
 			if (ATConfig.useGod) ess.getUser(p).setGodModeEnabled(tf);
-			if (ATConfig.useFly)
-			{
-				if (p.getGameMode() == GameMode.CREATIVE) tf = true;
-				ess.getUser(p).setAllowFlight(tf);
-				if (!ess.getUser(p).getAllowFlight())
-					ess.getUser(p).setFlying(false);
-			}
 		}
 	}
 }
