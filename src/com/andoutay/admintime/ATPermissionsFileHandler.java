@@ -140,9 +140,11 @@ public class ATPermissionsFileHandler implements Listener
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent evt)
 	{
-		exitAdminMode(evt.getPlayer(), evt.getPlayer().getWorld().getName());
-		if (evt.getPlayer().hasPermission("admintime.loginlist"))
-			plugin.showListToSender((CommandSender)evt.getPlayer(), 1);
+		Player p = evt.getPlayer();
+		exitAdminMode(p, p.getWorld().getName());
+		if (p.hasPermission("admintime.loginlist"))
+			if (plugin.inAdminSize() > 0)
+				plugin.showListToSender((CommandSender)p, 1);
 	}
 	
 	@EventHandler
@@ -179,6 +181,7 @@ public class ATPermissionsFileHandler implements Listener
 	public void onPlayerChangeGameMode(PlayerGameModeChangeEvent evt)
 	{
 		final Player p = evt.getPlayer();
+		//freaking plugins using EventPriority.MONITOR...
 		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable () { public void run() { setGodAndFly(p, true); }}, 0);
 	}
 	

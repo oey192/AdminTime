@@ -228,7 +228,7 @@ public class AdminTime extends JavaPlugin
 		if (!(s instanceof ConsoleCommandSender || (s instanceof Player && ((Player) s).hasPermission("admintime.list"))))
 			return noAccess(s);
 
-		if (inAdminMode.size() == 0)
+		if (inAdminSize() == 0)
 		{
 			s.sendMessage(chPref + "No players are currently in Admin Mode");
 			return true;
@@ -251,7 +251,7 @@ public class AdminTime extends JavaPlugin
 	public void showListToSender(CommandSender s, int page)
 	{
 		final int perPage = 9;
-		final int totPages = inAdminMode.size() / perPage + 1;
+		final int totPages = inAdminSize() / perPage + 1;
 		Object players[] = inAdminMode.keySet().toArray();
 		Object values[] = inAdminMode.values().toArray();
 		Player p = null;
@@ -270,7 +270,7 @@ public class AdminTime extends JavaPlugin
 			if ((Boolean) values[i])
 			{
 				p = (Player) players[i];
-				if ((s instanceof ConsoleCommandSender) || (  !isVanished(p.getName()) || canSee((Player)s, p)))
+				if ((s instanceof ConsoleCommandSender) || (!isVanished(p.getName()) || canSee((Player)s, p)))
 				{
 					found = true;
 					s.sendMessage(ChatColor.AQUA + p.getDisplayName() + ChatColor.RESET + " - " + (helping.get(p).equalsIgnoreCase(p.getName()) ? "themself" : helping.get(p)) + (reasons.get(p).length() > 0 ? " (" + reasons.get(p) + ")" : ""));
@@ -299,6 +299,14 @@ public class AdminTime extends JavaPlugin
 
 		return true;
 	}
+	
+	public int inAdminSize()
+	{
+		int ans = 0;
+		for (Player p : inAdminMode.keySet()) if (inAdminMode.get(p)) ans++;
+		return ans;
+	}
+	
 
 	private boolean noAccess(CommandSender s)
 	{
