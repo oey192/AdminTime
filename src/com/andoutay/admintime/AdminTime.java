@@ -128,9 +128,10 @@ public class AdminTime extends JavaPlugin
 
 		if (inAdminMode.get(p))
 		{
-			//1 line for debug
+			//2 lines for debug
 			if (args.length >= 1 && ATConfig.dispDebug) log.info(logPref + "Checking for player based on: " + args[0]);
 			
+			if (ATConfig.dispDebug && args.length > 0) log.info(logPref + "PlayerForName: " + getPlayerForName(args[0]) + ", offlinePlayer: " + getServer().getOfflinePlayer(args[0]) +", hasPlayedBefore: " + getServer().getOfflinePlayer(args[0]).hasPlayedBefore());
 			
 			if (args.length == 0)
 			{
@@ -169,7 +170,7 @@ public class AdminTime extends JavaPlugin
 		}
 		else
 		{
-			p.teleport(lastLocs.get(p));
+			if (lastLocs.get(p) != null) p.teleport(lastLocs.get(p));
 			lastLocs.remove(p);
 			permHandler.exitAdminMode(p, p.getWorld().getName());
 			tellAll(p, "left", "", "");

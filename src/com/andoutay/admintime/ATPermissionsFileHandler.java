@@ -3,6 +3,7 @@ package com.andoutay.admintime;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -19,6 +20,7 @@ import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 import ru.tehkode.permissions.PermissionManager;
 
@@ -32,12 +34,14 @@ public class ATPermissionsFileHandler implements Listener
 	private Logger log = Logger.getLogger("Minecraft");
 	private final String adMode = "adminMode";
 	private final String regMode = "regMode";
+	private HashMap <Player, BukkitTask> timers;
 	private boolean disabled;
 	
 	ATPermissionsFileHandler(AdminTime plugin)
 	{
 		permFile = new File(plugin.getDataFolder(), "permissions.yml");
 		perms = YamlConfiguration.loadConfiguration(permFile);
+		timers = new HashMap<Player, BukkitTask>();
 		this.plugin = plugin;
 	}
 	
@@ -182,7 +186,8 @@ public class ATPermissionsFileHandler implements Listener
 	{
 		final Player p = evt.getPlayer();
 		//freaking plugins using EventPriority.MONITOR...
-		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable () { public void run() { setGodAndFly(p, true); }}, 0);
+		//if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable () { public void run() { setGodAndFly(p, true); }}, ATConfig.flyDelay);
+		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) timers.put(p, plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() { public void run() {reinforceGodAndFly(p); }}, ATConfig.flyDelay, 20));
 	}
 	
 	@EventHandler
@@ -193,6 +198,32 @@ public class ATPermissionsFileHandler implements Listener
 			for (Player p: AdminTime.inAdminMode.keySet())
 				exitAdminMode(p, p.getWorld().getName());
 			disabled = true;
+		}
+	}
+	
+	private void reinforceGodAndFly(Player p)
+	{
+		if (p.getAllowFlight())
+		{
+			BukkitTask t = timers.get(p);
+			try
+			{
+				t.cancel();
+				
+				//1 Line for debug
+				if (ATConfig.dispDebug) log.info(AdminTime.logPref + "Canceled timer for " + p.getDisplayName());
+			}
+			catch (NullPointerException e)
+			{
+				
+			}
+			timers.remove(p);
+		}
+		else
+		{
+			//1 line for debug
+			if (ATConfig.dispDebug) log.info(AdminTime.logPref + "Set fly to true for " + p.getDisplayName());
+			setGodAndFly(p, true);
 		}
 	}
 

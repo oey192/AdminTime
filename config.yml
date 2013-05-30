@@ -1,4 +1,5 @@
 useGod: true
 useFly: true
+flyDelay: 5
 usePex: true
 dispDebug: false

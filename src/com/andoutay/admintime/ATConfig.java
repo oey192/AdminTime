@@ -7,6 +7,7 @@ public class ATConfig
 	private static Configuration config;
 	
 	public static boolean useGod, useFly, usePex, dispDebug;
+	public static int flyDelay;
 	private static AdminTime plugin;
 	
 	ATConfig(AdminTime plugin)
@@ -33,6 +34,7 @@ public class ATConfig
 	{
 		useGod = config.getBoolean("useGod");
 		useFly = config.getBoolean("useFly");
+		flyDelay = config.getInt("flyDelay");
 		usePex = config.getBoolean("usePex");
 		dispDebug = config.getBoolean("dispDebug");
 	}
