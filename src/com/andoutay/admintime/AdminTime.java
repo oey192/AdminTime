@@ -54,7 +54,7 @@ public class AdminTime extends JavaPlugin
 
 		ATConfig.onEnable();
 		permHandler.onEnable();
-		getServer().getPluginManager().registerEvents(permHandler, this);
+		server.getPluginManager().registerEvents(permHandler, this);
 
 		log.info(logPref + "Enabled");
 	}
@@ -131,14 +131,14 @@ public class AdminTime extends JavaPlugin
 			//2 lines for debug
 			if (args.length >= 1 && ATConfig.dispDebug) log.info(logPref + "Checking for player based on: " + args[0]);
 			
-			if (ATConfig.dispDebug && args.length > 0) log.info(logPref + "PlayerForName: " + getPlayerForName(args[0]) + ", offlinePlayer: " + getServer().getOfflinePlayer(args[0]) +", hasPlayedBefore: " + getServer().getOfflinePlayer(args[0]).hasPlayedBefore());
+			if (ATConfig.dispDebug && args.length > 0) log.info(logPref + "PlayerForName: " + getPlayerForName(args[0]) + ", offlinePlayer: " + server.getOfflinePlayer(args[0]) +", hasPlayedBefore: " + server.getOfflinePlayer(args[0]).hasPlayedBefore());
 			
 			if (args.length == 0)
 			{
 				inAdminMode.put(p, false);
 				return missingArgument(s);
 			}
-			else if (getPlayerForName(args[0]) == null && !getServer().getOfflinePlayer(args[0]).hasPlayedBefore())
+			else if (getPlayerForName(args[0]) == null && !server.getOfflinePlayer(args[0]).hasPlayedBefore())
 			{
 				inAdminMode.put(p, false);
 				//1 line for debug
@@ -350,10 +350,10 @@ public class AdminTime extends JavaPlugin
 		Player player = null;
 		boolean found = false, foundMult = false;
 
-		player = getServer().getPlayer(partial);
+		player = server.getPlayer(partial);
 
 		if (player == null)
-			for (Player p : getServer().getOnlinePlayers())
+			for (Player p : server.getOnlinePlayers())
 				if (p.getDisplayName().toLowerCase().contains(partial.toLowerCase()))
 				{
 					if (found)
@@ -375,7 +375,7 @@ public class AdminTime extends JavaPlugin
 	{
 		Player temp = getPlayerForName(partial);
 		if (temp == null)
-			return getServer().getOfflinePlayer(partial).getName();
+			return server.getOfflinePlayer(partial).getName();
 		return temp.getDisplayName();
 
 		/*
@@ -408,7 +408,7 @@ public class AdminTime extends JavaPlugin
 
 	public void tellAll(Player player, String msg, String recipient, String reason)
 	{
-		for (Player p : getServer().getOnlinePlayers())
+		for (Player p : server.getOnlinePlayers())
 		{
 	    	if (p.hasPermission("admintime.notify") && (!isVanished(p.getName()) || canSee(p, player)))
 	    			p.sendMessage(ChatColor.WHITE + player.getDisplayName() + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).toString()) + (reason.equalsIgnoreCase("") ? "" : " with " + reason) + "!");
