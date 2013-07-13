@@ -271,7 +271,7 @@ public class AdminTime extends JavaPlugin
 			if ((Boolean) values[i])
 			{
 				p = (Player) players[i];
-				if ((s instanceof ConsoleCommandSender) || (!isVanished(p.getName()) || canSee((Player)s, p)))
+				if ((s instanceof ConsoleCommandSender) || (!isVanished(p.getName()) || ((Player) s).canSee(p)))
 				{
 					found = true;
 					s.sendMessage(ChatColor.AQUA + p.getDisplayName() + ChatColor.RESET + " - " + (helping.get(p).equalsIgnoreCase(p.getName()) ? "themself" : helping.get(p)) + (reasons.get(p).length() > 0 ? " (" + reasons.get(p) + ")" : ""));
@@ -386,8 +386,7 @@ public class AdminTime extends JavaPlugin
 
 	private static boolean isVanished(String name)
 	{
-		try
-		{
+		try {
 			if (server.getPluginManager().getPlugin("VanishNoPacket") != null)
 				return VanishNoPacket.isVanished(name);
 		} catch (Exception localException) {
@@ -395,22 +394,11 @@ public class AdminTime extends JavaPlugin
 		return false;
 	}
 
-	private boolean canSee(Player looking, Player uncertain)
-	{
-		try
-		{
-			if (server.getPluginManager().getPlugin("VanishNoPacket") != null)
-				return VanishNoPacket.canSee(looking, uncertain);
-		} catch (Exception localException) {
-		}
-		return true;
-	}
-
 	public void tellAll(Player player, String msg, String recipient, String reason)
 	{
 		for (Player p : server.getOnlinePlayers())
 		{
-	    	if (p.hasPermission("admintime.notify") && (!isVanished(p.getName()) || canSee(p, player)))
+	    	if (p.hasPermission("admintime.notify") && (!isVanished(p.getName()) || p.canSee(player)))
 	    			p.sendMessage(ChatColor.WHITE + player.getDisplayName() + " " + ChatColor.GRAY + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).toString()) + (reason.equalsIgnoreCase("") ? "" : " with " + reason) + "!");
 	    }
 	    log.info(logPref + player.getName() + " " + msg + " Admin Mode" + (recipient.equalsIgnoreCase("") ? "!" : new StringBuilder(" to help ").append(recipient.equalsIgnoreCase(player.getDisplayName()) ? "themself" : recipient).toString()) + (reason.equalsIgnoreCase("") ? "" : " with " + reason) + "!");
