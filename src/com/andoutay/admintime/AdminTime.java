@@ -75,7 +75,7 @@ public class AdminTime extends JavaPlugin
 		else if (isList(cmd.getName(), args))
 			return showList(s, args);
 		else if (isHelp(cmd.getName(), args))
-			return showHelp(s);
+			return showHelp(s, label);
 		else if (isToggle(cmd.getName(), args))
 			return toggle(s, args);
 
@@ -287,16 +287,16 @@ public class AdminTime extends JavaPlugin
 			s.sendMessage("No players are currently in Admin Mode");
 	}
 
-	private boolean showHelp(CommandSender s)
+	private boolean showHelp(CommandSender s, String label)
 	{
 		s.sendMessage(chPref + "Help:");
-		s.sendMessage("Aliases: at, am, adminmode");
-		s.sendMessage("/admintime [player] [reason]: Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified. You may specify a reason that you are helping the player");
-		s.sendMessage("/admintime reload: Reload the AdminTime permissions file");
-		s.sendMessage("/admintime version: Get the current version of AdminTime");
-		s.sendMessage("/admintime list [#]: List players in admin mode, who they're helping and the reason, if any. Specify page numbers if necessary");
-		s.sendMessage("/admintime eject: Kick a player out of admin mode");
-		s.sendMessage("/admintime help: Show this help message");
+		s.sendMessage("Aliases: admintime, am, adminmode");
+		s.sendMessage("/" + label + " [player] (reason): Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified. You may specify a reason that you are helping the player");
+		s.sendMessage("/" + label + " reload: Reload the AdminTime config and permissions files");
+		s.sendMessage("/" + label + " version: Get the current version of AdminTime");
+		s.sendMessage("/" + label + " list [#]: List players in admin mode, who they're helping and the reason, if any. Specify page numbers if necessary");
+		s.sendMessage("/" + label + " eject: Kick a player out of admin mode");
+		s.sendMessage("/" + label + " help: Show this help message");
 
 		return true;
 	}
