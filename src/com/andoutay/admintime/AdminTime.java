@@ -2,6 +2,7 @@ package com.andoutay.admintime;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
@@ -11,8 +12,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.kitteh.vanish.staticaccess.VanishNoPacket;
 
 public class AdminTime extends JavaPlugin
 {
@@ -345,7 +346,7 @@ public class AdminTime extends JavaPlugin
 		return true;
 	}
 
-	public Player getPlayerForName(String partial)
+	public static Player getPlayerForName(String partial)
 	{
 		Player player = null;
 		boolean found = false, foundMult = false;
@@ -387,8 +388,14 @@ public class AdminTime extends JavaPlugin
 	private static boolean isVanished(String name)
 	{
 		try {
-			if (server.getPluginManager().getPlugin("VanishNoPacket") != null)
-				return VanishNoPacket.isVanished(name);
+			if (server.getPluginManager().getPlugin("VanishNoPacket") != null) {
+				List<MetadataValue> md = getPlayerForName(name).getMetadata("vanished");
+				if (md.size() == 1) {
+					for (MetadataValue m: md) {
+						return m.asBoolean();
+					}
+				}
+			}
 		} catch (Exception localException) {
 		}
 		return false;
