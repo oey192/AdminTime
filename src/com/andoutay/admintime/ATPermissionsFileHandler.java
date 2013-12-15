@@ -162,6 +162,9 @@ public class ATPermissionsFileHandler implements Listener
 			p.teleport(AdminTime.lastLocs.get(p));
 			AdminTime.inAdminMode.remove(p);
 			AdminTime.lastLocs.remove(p);
+		} else if (AdminTime.inAdminMode.containsKey(p)) {
+			AdminTime.inAdminMode.remove(p);
+			AdminTime.lastLocs.remove(p);
 		}
 	}
 
