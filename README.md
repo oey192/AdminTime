@@ -5,15 +5,15 @@ AdminTime allows admins to switch in and out of an Admining state and allows the
 
 This plugin uses Essentials to enable God mode and Fly mode if the appropriate config values are set.
 
-Players will not be informed when vanished players (VanishNoPacket) enter Admin Mode, nor will vanished players show up in /admintime list.
+Players will not be informed when vanished players (VanishNoPacket) enter or exit Admin Mode, nor will vanished players show up in /admintime list.
 
 Note: If PermissionsEx is being used on your server, this plugin temporarily overrides permissions set by PermissionsEx when the appropriate config value is set to true. When this is set to false, this plugin only modifies permissions via the built-in Bukkit Pernussions API. This can cause certain permisisons used with this plugin to have no effect as some plugins (e.g. WorldEdit) talk directly to PermissionsEx to check what permissions a player has.
 
-<h2>Commands</h2>
+##Commands
 
 Aliases: at, am, adminmode
 
-/admintime [player] [reason]:<br/>Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified. A reason may be specified if desired.<br/>When leaving admin mode, the player is teleported to the locatation they were at when they entered admin mode
+/admintime [player] (reason):<br/>Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified. A reason may be specified if desired.<br/>When leaving admin mode, the player is teleported to the locatation they were at when they entered admin mode
 
 /admintime reload:<br/>Reload the AdminTime permissions file
 
@@ -26,7 +26,7 @@ Aliases: at, am, adminmode
 /admintime help:<br/>Show in-game help
 
 
-<h2>Permissions</h2>
+##Permissions
 
 admintime.*:<br/>Gives access to all AdminTime commands
 
@@ -48,7 +48,7 @@ admintime.list:<br/>Allows players to see who is in Admin Mode
 
 admintime.loginlist:<br/>Shows a list of players in Admin Mode to the player upon logging in. This will show even if the player does not have admintime.list
 
-<h2>Config</h2>
+##Config
 
 useGod:<br/>If Essentials is present and this is set to true, god mode is turned on for the player upon entering Admin Mode and turned off when the player leaves Admin Mode
 
