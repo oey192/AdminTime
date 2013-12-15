@@ -53,15 +53,11 @@ public class ATPermissionsFileHandler implements Listener
 		for (World w : worlds)
 		{
 			ArrayList<String> list = new ArrayList<String>(), list2 = new ArrayList<String>();
-			list.add("permission.for." + w.getName() + ".for.admin.mode");
-			list2.add("permission.for." + w.getName() + ".for.normal.mode");
 			perms.addDefault(adMode + "." + w.getName(), list);
 			perms.addDefault(regMode + "." + w.getName(), list2);
 		}
 		
 		ArrayList<String> allList = new ArrayList<String>(), allList2 = new ArrayList<String>();
-		allList.add("permission.for.all.worlds.in.admin.mode");
-		allList2.add("permission.for.all.worlds.in.normal.mode");
 		perms.addDefault(adMode + ".allWorlds", allList);
 		perms.addDefault(regMode + ".allWorlds", allList2);
 		
@@ -189,7 +185,6 @@ public class ATPermissionsFileHandler implements Listener
 	{
 		final Player p = evt.getPlayer();
 		//freaking plugins using EventPriority.MONITOR...
-		//if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable () { public void run() { setGodAndFly(p, true); }}, ATConfig.flyDelay);
 		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) timers.put(p, plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() { public void run() {reinforceGodAndFly(p); }}, ATConfig.flyDelay, 20));
 	}
 	
