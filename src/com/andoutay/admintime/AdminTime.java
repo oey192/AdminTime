@@ -1,5 +1,6 @@
 package com.andoutay.admintime;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,11 +23,7 @@ public class AdminTime extends JavaPlugin
 	 * 
 	 * Add mChat support (see below)
 	 * 
-	 * Add Metrics support
-	 * 
 	 * Add Auto-update support
-	 * 
-	 * put on BukkitDev
 	 */
 
 	public static Logger log = Logger.getLogger("Minecraft");
@@ -56,6 +53,13 @@ public class AdminTime extends JavaPlugin
 		ATConfig.onEnable();
 		permHandler.onEnable();
 		server.getPluginManager().registerEvents(permHandler, this);
+		
+		try {
+			Metrics metrics = new Metrics(this);
+			metrics.start();
+		} catch (IOException e) {
+			
+		}
 
 		log.info(logPref + "Enabled");
 	}
