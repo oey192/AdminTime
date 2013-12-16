@@ -176,11 +176,12 @@ public class ATPermissionsFileHandler implements Listener
 	@EventHandler(priority = EventPriority.LOW)
 	public void onPlayerChangeWorld(PlayerChangedWorldEvent evt)
 	{
-		Player p = evt.getPlayer();
+		final Player p = evt.getPlayer();
 		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p))
 		{
 			setPermSet(adMode, p, evt.getFrom().getName(), false);
 			setPermSet(adMode, p, p.getWorld().getName(), true);
+			timers.put(p, plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() { public void run() {reinforceGodAndFly(p); }}, ATConfig.flyDelay, 20));
 		}
 		else
 		{
@@ -194,7 +195,9 @@ public class ATPermissionsFileHandler implements Listener
 	{
 		final Player p = evt.getPlayer();
 		//freaking plugins using EventPriority.MONITOR...
-		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) timers.put(p, plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() { public void run() {reinforceGodAndFly(p); }}, ATConfig.flyDelay, 20));
+		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) {
+			timers.put(p, plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() { public void run() {reinforceGodAndFly(p); }}, ATConfig.flyDelay, 20));
+		}
 	}
 	
 	@EventHandler
@@ -210,7 +213,7 @@ public class ATPermissionsFileHandler implements Listener
 	
 	private void reinforceGodAndFly(Player p)
 	{
-		if (p.getAllowFlight())
+		if (p.getAllowFlight() || !(AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)))
 		{
 			BukkitTask t = timers.get(p);
 			try
