@@ -125,13 +125,10 @@ public class AdminTime extends JavaPlugin
 		if (!inAdminMode.containsKey(p))
 			inAdminMode.put(p, false);
 
-		inAdminMode.put(p, !inAdminMode.get(p));
-
-		if (inAdminMode.get(p))
+		if (!inAdminMode.get(p))
 		{
 			//2 lines for debug
 			if (args.length >= 1 && ATConfig.dispDebug) log.info(logPref + "Checking for player based on: " + args[0]);
-			
 			if (ATConfig.dispDebug && args.length > 0) log.info(logPref + "PlayerForName: " + getPlayerForName(args[0]) + ", offlinePlayer: " + server.getOfflinePlayer(args[0]) +", hasPlayedBefore: " + server.getOfflinePlayer(args[0]).hasPlayedBefore());
 			
 			if (args.length == 0)
@@ -165,16 +162,13 @@ public class AdminTime extends JavaPlugin
 			lastLocs.put(p, p.getLocation());
 			helping.put(p, str);
 			reasons.put(p, rsn);
-			permHandler.enterAdminMode(p, p.getWorld().getName());
+			permHandler.enterAdminMode(p);
 			tellAll(p, "entered", str, rsn);
 			p.sendMessage(chPref + ChatColor.RED + "You are now in Admin Mode!");
 		}
 		else
 		{
-			if (lastLocs.get(p) != null) p.teleport(lastLocs.get(p));
-			lastLocs.remove(p);
-			permHandler.exitAdminMode(p, p.getWorld().getName());
-			tellAll(p, "left", "", "");
+			permHandler.exitAdminMode(p);
 			p.sendMessage(chPref + ChatColor.RED + "You have left Admin Mode!");
 		}
 
@@ -214,10 +208,8 @@ public class AdminTime extends JavaPlugin
 
 		if (inAdminMode.containsKey(p) && lastLocs.containsKey(p) && inAdminMode.get(p))
 		{
-			inAdminMode.put(p, false);
-			permHandler.exitAdminMode(p, p.getWorld().getName());
-			lastLocs.remove(p);
-			tellAll(p, "left", "", "");
+			permHandler.exitAdminMode(p);
+			p.sendMessage(chPref + ChatColor.RED + "You have been removed from Admin Mode");
 		}
 		else
 			s.sendMessage(chPref + "That player is not in admin mode");

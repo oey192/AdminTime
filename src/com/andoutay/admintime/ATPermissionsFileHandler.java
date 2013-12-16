@@ -69,16 +69,29 @@ public class ATPermissionsFileHandler implements Listener
 		}
 	}
 	
-	public void enterAdminMode(Player p, String worldName)
+	public void enterAdminMode(Player p)
 	{
-		swapPermSets(adMode, regMode, p, worldName);
+		swapPermSets(adMode, regMode, p, p.getWorld().getName());
 		setGodAndFly(p, true);
+		
+		if (AdminTime.inAdminMode.containsKey(p) && !AdminTime.inAdminMode.get(p)) {
+			AdminTime.inAdminMode.put(p, true);
+		}
 	}
 	
-	public void exitAdminMode(Player p, String worldName)
+	public void exitAdminMode(Player p)
 	{
-		swapPermSets(regMode, adMode, p, worldName);
+		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p) && AdminTime.lastLocs.containsKey(p)) {
+			p.teleport(AdminTime.lastLocs.get(p));
+			AdminTime.lastLocs.remove(p);
+		}
+		swapPermSets(regMode, adMode, p, p.getWorld().getName());
 		setGodAndFly(p, false);
+
+		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p)) {
+			AdminTime.inAdminMode.put(p, false);
+			plugin.tellAll(p, "left", "", "");
+		}
 	}
 	
 	private void swapPermSets(String set1, String set2, Player p, String worldName)
@@ -131,9 +144,9 @@ public class ATPermissionsFileHandler implements Listener
 		for (Player p : AdminTime.inAdminMode.keySet())
 		{
 			if (AdminTime.inAdminMode.get(p))
-				enterAdminMode(p, p.getWorld().getName());
+				enterAdminMode(p);
 			else
-				exitAdminMode(p, p.getWorld().getName());
+				exitAdminMode(p);
 		}
 	}
 	
@@ -141,7 +154,7 @@ public class ATPermissionsFileHandler implements Listener
 	public void onPlayerJoin(PlayerJoinEvent evt)
 	{
 		Player p = evt.getPlayer();
-		exitAdminMode(p, p.getWorld().getName());
+		exitAdminMode(p);
 		if (p.hasPermission("admintime.loginlist"))
 			if (plugin.inAdminSize() > 0)
 				plugin.showListToSender((CommandSender)p, 1);
@@ -153,15 +166,11 @@ public class ATPermissionsFileHandler implements Listener
 		Player p = evt.getPlayer();
 		if (AdminTime.inAdminMode.containsKey(p) && AdminTime.inAdminMode.get(p))
 		{
-			plugin.tellAll(p, "left", "", "");
-			exitAdminMode(p, p.getWorld().getName());
-			p.teleport(AdminTime.lastLocs.get(p));
-			AdminTime.inAdminMode.remove(p);
-			AdminTime.lastLocs.remove(p);
-		} else if (AdminTime.inAdminMode.containsKey(p)) {
-			AdminTime.inAdminMode.remove(p);
-			AdminTime.lastLocs.remove(p);
+			exitAdminMode(p);
+		} else {
+			AdminTime.lastLocs.remove(p);			//just in case other methods haven't caught this already
 		}
+		AdminTime.inAdminMode.remove(p);
 	}
 
 	@EventHandler(priority = EventPriority.LOW)
@@ -194,7 +203,7 @@ public class ATPermissionsFileHandler implements Listener
 		if (!disabled)
 		{
 			for (Player p: AdminTime.inAdminMode.keySet())
-				exitAdminMode(p, p.getWorld().getName());
+				exitAdminMode(p);
 			disabled = true;
 		}
 	}
