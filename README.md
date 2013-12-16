@@ -1,19 +1,23 @@
 AdminTime Readme
 ====
 
-AdminTime allows admins to switch in and out of an Admining state and allows them to resume where they left off when done admining
+AdminTime allows admins to switch in and out of an Admining state and allows them to resume where they left off when done admining. It can be insanely handy if your admins have a hard time restraining themselves from using admiring abilities during normal gameplay as it allows other admins to view who is currently using their AdminTime-granted admin abilities and notifies all admins (who have the appropriate permission) when players enter and leave Admin Mode.
 
-This plugin uses Essentials to enable God mode and Fly mode if the appropriate config values are set.
+It also helps admins admin more effectively by teleporting them back to the location they were at when they entered Admin Mode when they exit admin mode, allowing them to pick up right where they left off before going off to admin something. And, if enabled in the config file, admins gain both god mode\* and the ability to fly\* (don't worry, they aren't in creative, so they won't be spawning in items) when in Admin Mode
 
 Players will not be informed when vanished players (VanishNoPacket) enter or exit Admin Mode, nor will vanished players show up in /admintime list.
 
-Note: If PermissionsEx is being used on your server, this plugin temporarily overrides permissions set by PermissionsEx when the appropriate config value is set to true. When this is set to false, this plugin only modifies permissions via the built-in Bukkit Pernussions API. This can cause certain permisisons used with this plugin to have no effect as some plugins (e.g. WorldEdit) talk directly to PermissionsEx to check what permissions a player has.
+Players are automatically removed from Admin Mode upon disconnecting if they forget to exit it first.
+
+Note: If PermissionsEx is being used on your server, this plugin temporarily overrides permissions set by PermissionsEx when the appropriate config value is set to true. When this is set to false, this plugin only modifies permissions via the built-in Bukkit Pernussions API. This can cause certain permisisons used with this plugin to have no effect as some plugins (e.g. WorldEdit) talk directly to PermissionsEx to check what permissions a player has. It is therefore generally recommended to leave usePex set to true unless you don't use PermissionsEx
+
+\*Requires Essentials
 
 ##Commands
 
 Aliases: at, am, adminmode
 
-/admintime [player] (reason):<br/>Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified. A reason may be specified if desired.<br/>When leaving admin mode, the player is teleported to the locatation they were at when they entered admin mode
+/admintime [player] [reason]:<br/>Toggle admin mode. The name of the player being helped is required for entering admin mode. If that player is offline, their full name must be specified. A reason may be specified if desired.<br/>When leaving admin mode, the player is teleported to the locatation they were at when they entered admin mode
 
 /admintime reload:<br/>Reload the AdminTime permissions file
 
@@ -62,7 +66,7 @@ On plugin load, this file is populated with nodes for any new worlds that have b
 
 The two overarching divisions, adminMode and regMode designate two separate permissions sets. One will be given to players in admin mode, the other for players not in admin mode (note: players must have permissions to get into admin mode before either set of permissions will be given). It should be rare to need to give admins any special permissions for when they're not in admin mode, but the functionality has been provided in case there's that one weird permission that disables a special ability and there's no permission that grants it
 
-An example file follows that gives users access to essentials and prism when in admin mode in all worlds and access to world edit when in the test world. A fictional "can't build" is given to all admins in the test world
+An example file follows that gives users access to essentials and prism when in admin mode in all worlds and access to world edit when in the test world. A fictional "can't build" permission is given to all admins in the test world
 
 	adminMode:
 		world: []
