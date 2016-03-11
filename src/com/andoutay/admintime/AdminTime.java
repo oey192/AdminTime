@@ -58,7 +58,7 @@ public class AdminTime extends JavaPlugin
 			Metrics metrics = new Metrics(this);
 			metrics.start();
 		} catch (IOException e) {
-			
+			log.warning(logPref + "Failed to initialize metrics");
 		}
 
 		log.info(logPref + "Enabled");
